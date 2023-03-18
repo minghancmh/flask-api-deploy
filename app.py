@@ -29,7 +29,7 @@ app.config.from_object(config_type)
 
 db = SQLAlchemy(app)
 
-from models import Account, UserSavedProperty, Property
+from models import Account, UserSavedProperty, Property, PropertyType
 
 engine = sa.create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo = True)
 inspector = sa.inspect(engine)
@@ -123,7 +123,7 @@ def updateUser(user_id):
 
 @app.route("/createProperty", methods=["POST"])
 def createProperty():
-    # data = json.loads('{"id": 1, "clusterId": "1", "type": "RENT"}')
+    # data = json.loads('{"id": 1, "clusterId": "1", "type": "rent"}')
     data = request.get_json() #get json payload from the post req
     print(data)
     if "type" not in data:
