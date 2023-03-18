@@ -2,7 +2,7 @@ import json
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import sessionmaker
-
+import sqlalchemy as sa
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import pickle
@@ -20,6 +20,7 @@ app = Flask(__name__)
 # env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
 # app.config.from_object(env_config)
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://'+os.getenv("MYSQL_USERNAME")+ ':' + os.getenv("MYSQL_PASSWORD") + '@localhost/homey_db'
 
 config_type = os.getenv('CONFIG_TYPE', default='config.DevelopmentConfig')
@@ -27,12 +28,23 @@ app.config.from_object(config_type)
 
 
 db = SQLAlchemy(app)
-engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo = True)
+
+from models import Account, UserSavedProperty, Property
+
+engine = sa.create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo = True)
+inspector = sa.inspect(engine)
+if not inspector.has_table("UserAccounts"):
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        app.logger.info('Initialized the database!')
+else:
+    app.logger.info('Database already contains the users table.')
+
 Session = sessionmaker(bind = engine)
 session = Session()
 
 
-from models import Account, UserSavedProperty, Property
 
 # routes
 
