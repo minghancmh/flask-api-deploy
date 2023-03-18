@@ -21,10 +21,10 @@ app = Flask(__name__)
 # app.config.from_object(env_config)
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://'+os.getenv("MYSQL_USERNAME")+ ':' + os.getenv("MYSQL_PASSWORD") + '@localhost/homey_db'
-
-# config_type = os.getenv('CONFIG_TYPE', default='config.DevelopmentConfig')
-# app.config.from_object(config_type)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://'+os.getenv("MYSQL_USERNAME")+ ':' + os.getenv("MYSQL_PASSWORD") + '@localhost/homey_db'
+# 
+config_type = os.getenv('CONFIG_TYPE', default='config.DevelopmentConfig')
+app.config.from_object(config_type)
 
 
 db = SQLAlchemy(app)
