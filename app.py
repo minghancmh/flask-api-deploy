@@ -123,7 +123,7 @@ def updateUser(user_id):
 
 @app.route("/createProperty", methods=["POST"])
 def createProperty():
-    # data = json.loads('{"id": 1, "clusterId": "1", "type": "rent"}')
+    # data = json.loads('{"id": "1", "clusterId": "1", "type": "rent"}')
     data = request.get_json() #get json payload from the post req
     print(data)
     if "type" not in data:
@@ -191,7 +191,7 @@ def updateProperty(prop_id):
 
 @app.route("/createUserSavedProperty", methods=["POST"])
 def createUserSavedProperty():
-    # data = json.loads({"userID" : "1","propertyId" : "1", "property": {"id": 12, "clusterId": "1", "type": "RENT"}})
+    # data = json.loads({"userID" : "1","propertyId" : "1", "property": {"id": "12", "clusterId": "1", "type": "rent"}})
     data = request.get_json()
     pickledProperty = pickle.dumps(data["property"])
     new_row = UserSavedProperty(userID=data["userID"], propertyId=data["propertyId"], property=pickledProperty)
