@@ -138,7 +138,7 @@ def createProperty():
 @app.route("/viewProperty/<int:prop_id>", methods=["GET"])
 def viewProp(prop_id):
     if request.method == 'GET':
-        property = db.session.query(Property).filter_by(id = prop_id)
+        property = db.session.query(Property).filter_by(id = str(prop_id))
 
         if property.first() is None:
             return f"Property with PropID {prop_id} does not exist"
@@ -153,7 +153,7 @@ def viewProp(prop_id):
 @app.route("/deleteProperty/<int:prop_id>", methods=["GET"])
 def deleteProperty(prop_id):
     if request.method == 'GET':
-        property = Property.query.filter_by(id=prop_id).first()
+        property = Property.query.filter_by(id=str(prop_id)).first()
         if property is None:
             return f"Property with Property_ID {prop_id} does not exist"
         
@@ -169,7 +169,7 @@ def deleteProperty(prop_id):
 @app.route("/updateProperty/<int:prop_id>", methods=["POST"])
 def updateProperty(prop_id): 
     if request.method =="POST":
-        property = db.session.query(Property).filter_by(id = prop_id)
+        property = db.session.query(Property).filter_by(id = str(prop_id))
         prop = property[0]
         data = request.get_json()
 
@@ -203,7 +203,7 @@ def createUserSavedProperty():
 @app.route("/viewUSP/<int:user_id>", methods=["GET"])
 def viewUSP(user_id):
     if request.method == 'GET':
-        usp = db.session.query(UserSavedProperty).filter_by(userID = user_id).all()
+        usp = db.session.query(UserSavedProperty).filter_by(userID = str(user_id)).all()
         if len(usp)==0:
             return f"User with userID {user_id} has no saved listings"
         
@@ -216,7 +216,7 @@ def viewUSP(user_id):
 @app.route("/deleteUSP/<int:user_id>/<int:prop_id>", methods=["GET"])
 def deleteUSP(user_id,prop_id):
     if request.method == 'GET':
-        usp = UserSavedProperty.query.filter_by(userID = user_id, propertyId=prop_id).first()
+        usp = UserSavedProperty.query.filter_by(userID = str(user_id), propertyId=str(prop_id)).first()
         if usp is None:
             return f"USP does not exist"
         
