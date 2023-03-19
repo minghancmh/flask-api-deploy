@@ -11,10 +11,7 @@ idna==3.4
 itsdangerous==2.1.2
 Jinja2==3.1.2
 MarkupSafe==2.1.2
-models==0.0.0
 mysql-connector-python==8.0.32
-numpy==1.24.2
-pandas==1.5.3
 protobuf==3.20.3
 psycopg2==2.9.5
 psycopg2-binary==2.9.5
