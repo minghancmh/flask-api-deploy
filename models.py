@@ -15,7 +15,7 @@ class PropertyType(str, enum.Enum):
 # models
 class User(db.Model): 
     __tablename__ = 'User'
-    id = Column('id', String(24), primary_key=True, unique=True)
+    id = Column('id', String(25), primary_key=True, unique=True)
     name = Column('name', String(100))
     email = Column('email', String(100), unique=True)
     password = Column('password', String(100))

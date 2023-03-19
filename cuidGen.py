@@ -9,5 +9,3 @@ def generator():
     return uniqueId
 
 
-
-print(generator())
