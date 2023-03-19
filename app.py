@@ -75,8 +75,10 @@ def createUser():
 
     return response
 
-@app.route("/viewUser/<user_id>", methods=["GET"])
-def viewUser(user_id):
+@app.route("/getUser", methods=["GET"])
+def getUser():
+    args = request.args
+    user_id = args.get('id')
     if request.method == 'GET':
         user = db.session.query(User).filter_by(id = user_id)
         if user.first() is None:
@@ -96,9 +98,9 @@ def viewUser(user_id):
 
 
 
-@app.route("/deleteUser/<user_id>", methods=["GET"])
+@app.route("/deleteUser/<user_id>", methods=["DELETE"])
 def deleteUser(user_id):
-    if request.method == 'GET':
+    if request.method == 'DELETE':
         user = User.query.filter_by(id=user_id).first()
         if user is None:
             result_json = json.dumps(f"Account with userID {user_id} does not exist")
@@ -119,16 +121,20 @@ def deleteUser(user_id):
         return Response(json.dumps("method not allowed"), content_type='application/json')
 
     
-@app.route("/updateUser/<user_id>", methods=["POST"])
+@app.route("/updateUser/<user_id>", methods=["PATCH"])
 def updateUser(user_id): 
-    if request.method =="POST":
+    if request.method =="PATCH":
+        request_params = request.get_json()
         user = db.session.query(User).filter_by(id = user_id)
         acc = user[0]
-        data = request.get_json()
 
-        acc.name = data['name']
-        acc.email = data['email']
-        acc.password = data['password']
+        for key,value in request_params.items():
+            setattr(acc, key, value)
+
+
+        # acc.name = data['name']
+        # acc.email = data['email']
+        # acc.password = data['password']
 
 
 
@@ -158,8 +164,10 @@ def createProperty():
 
     return Response(json.dumps("Property created!"), content_type='application/json')
 
-@app.route("/viewProperty/<prop_id>", methods=["GET"])
-def viewProp(prop_id):
+@app.route("/getProperty", methods=["GET"])
+def getProperty():
+    args=request.args
+    prop_id=args.get("prop_id")
     if request.method == 'GET':
         property = db.session.query(Property).filter_by(id = prop_id)
 
@@ -173,9 +181,9 @@ def viewProp(prop_id):
 
             return Response(json.dumps(propout), content_type='application/json')
 
-@app.route("/deleteProperty/<int:prop_id>", methods=["GET"])
+@app.route("/deleteProperty/<int:prop_id>", methods=["DELETE"])
 def deleteProperty(prop_id):
-    if request.method == 'GET':
+    if request.method == 'DELETE':
         property = Property.query.filter_by(id=str(prop_id)).first()
         if property is None:
             return Response(json.dumps(f"Property with Property_ID {prop_id} does not exist"), content_type='application/json')
@@ -189,16 +197,15 @@ def deleteProperty(prop_id):
     else: 
         return Response(json.dumps("method not allowed"), content_type='application/json')
 
-@app.route("/updateProperty/<prop_id>", methods=["POST"])
+@app.route("/updateProperty/<prop_id>", methods=["PATCH"])
 def updateProperty(prop_id): 
-    if request.method =="POST":
+    if request.method =="PATCH":
         property = db.session.query(Property).filter_by(id = prop_id)
         prop = property[0]
-        data = request.get_json()
+        request_params = request.get_json()
 
-        prop.id = data['id']
-        prop.clusterId = data['clusterId']
-        prop.type = data['type']
+        for key,value in request_params.items():
+            setattr(prop, key, value)
 
         db.session.commit()
 
@@ -244,9 +251,9 @@ def createUserSavedProperty(user_id):
 #             return json.dumps({"result": listout})
 
 # this requires login!
-@app.route("/deleteUSP/<user_id>/<prop_id>", methods=["GET"])
+@app.route("/deleteUSP/<user_id>/<prop_id>", methods=["DELETE"])
 def deleteUSP(user_id,prop_id):
-    if request.method == 'GET':
+    if request.method == 'DELETE':
         usp = UserSavedProperty.query.filter_by(userID = user_id, propertyId=prop_id).first()
         user = User.query.filter_by(id=user_id).first()
         if usp is None:
