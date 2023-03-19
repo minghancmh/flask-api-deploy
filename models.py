@@ -1,9 +1,10 @@
-from sqlalchemy import JSON, Column, String, Integer, create_engine, Insert, select
+from sqlalchemy import Column, String
 from app import db
 from sqlalchemy.types import PickleType, Enum
 from sqlalchemy.schema import PrimaryKeyConstraint
 import enum
 import pickle
+
 
 class PropertyType(str, enum.Enum):
     RENT = "rent"
@@ -12,25 +13,37 @@ class PropertyType(str, enum.Enum):
 # models in the database are init here. make sure database parameters do not change!
 # if changing any of the models, drop the table on sqlworkbench first, then reinitialise them.
 # models
-class Account(db.Model): 
-    __tablename__ = 'UserAccounts'
-    userID = Column('userID', Integer, primary_key=True, unique=True)
-    userName = Column('userName', String(100), unique=True)
+class User(db.Model): 
+    __tablename__ = 'User'
+    id = Column('id', String(24), primary_key=True, unique=True)
+    name = Column('name', String(100))
+    email = Column('email', String(100), unique=True)
     password = Column('password', String(100))
-    email = Column('email', String(100))
-    savedListings = Column('savedListings', Integer)
-    address = Column('address', String(100))
+    propertySaved = Column('propertySaved', PickleType)
 
-    def __init__ (self, userID, userName, password, email, savedListings, address):
-        self.userID = userID
-        self.userName = userName
-        self.password = password
+
+    def __init__ (self, id, name, email,password):
+        self.id = id
+        self.name = name
         self.email = email
-        self.savedListings = savedListings
-        self.address = address
+        self.password = password
+        self.propertySaved = pickle.dumps([])
+
 
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        dicout = {}
+        for col in self.__table__.columns:
+            if col.name=="id":
+                dicout["id"] = getattr(self,col.name)
+            if col.name=="name":
+                dicout["name"] = getattr(self,col.name)
+            if col.name=="email":
+                dicout["email"] = getattr(self,col.name)
+            if col.name=="password":
+                dicout["password"] = getattr(self,col.name)
+            if col.name=="propertySaved":
+                dicout["propertySaved"] = pickle.loads(getattr(self,col.name))
+        return dicout
 
 class Property(db.Model):
     __tablename__ = 'Property'
