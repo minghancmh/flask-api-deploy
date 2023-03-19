@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f7f46ab80975be2e58e0368d394c8d8c98f1d4168553f7f8ff02e2fdd4644626"
+            "sha256": "728838aa6098cbac5aa78b9a25ff66297d6f7c38dd999a4f409ed3ff21b91c11"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,13 +16,12 @@
         ]
     },
     "default": {
-        "cuid2": {
+        "cuid": {
             "hashes": [
-                "sha256:71c60fb36a591b5391322dd7bfc0de7b10a7f294c37c52e499496e0cbb5cba32",
-                "sha256:9e0b5f7a7f53bb771cb8796ad8357393c47bae74b9dcc29aea3bdb45f8573c93"
+                "sha256:74eaba154916a2240405c3631acee708c263ef8fa05a86820b87d0f59f84e978"
             ],
             "index": "pypi",
-            "version": "==1.2.0"
+            "version": "==0.4"
         },
         "sqlalchemy": {
             "hashes": [

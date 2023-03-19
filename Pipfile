@@ -4,8 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-cuid2 = "*"
 sqlalchemy-views = "*"
+cuid = "*"
 
 [dev-packages]
 
