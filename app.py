@@ -17,14 +17,12 @@ load_dotenv() #load environment variables
 
 
 app = Flask(__name__)
-# env_config = os.getenv("APP_SETTINGS", "config.DevelopmentConfig")
-# app.config.from_object(env_config)
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://'+os.getenv("MYSQL_USERNAME")+ ':' + os.getenv("MYSQL_PASSWORD") + '@localhost/homey_db'
+
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://'+os.getenv("MYSQL_USERNAME")+ ':' + os.getenv("MYSQL_PASSWORD") + '@localhost/homey_db'
 # 
-# config_type = os.getenv('CONFIG_TYPE', default='config.DevelopmentConfig')
-# app.config.from_object(config_type)
+config_type = os.getenv('CONFIG_TYPE', default='config.DevelopmentConfig')
+app.config.from_object(config_type)
 
 
 db = SQLAlchemy(app)
@@ -39,12 +37,8 @@ if not inspector.has_table("User"):
     with app.app_context():
         db.drop_all()
         db.create_all()
-        # my_view_select = text('SELECT * FROM UserSavedProperty WHERE userID=id')
         app.logger.info('Initialized the database!')
-    
-    # createview = CreateView('propertySaved', "SELECT * FROM UserSavedProperty WHERE userID=id")
-    # createview = CreateView('propertySaved', UserSavedProperty.select().where(UserSavedProperty.c.userID > 5))
-    # engine.execute(createview)
+
 else:
     app.logger.info('Database already contains the User table.')
 
@@ -54,10 +48,6 @@ session = Session()
 
 
 # routes
-
-@app.route('/')
-def hello():
-    return "You shouldn't be here!"
 
 
 ### CRUD FOR USER
