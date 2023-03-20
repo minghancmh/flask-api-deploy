@@ -19,10 +19,10 @@ load_dotenv() #load environment variables
 app = Flask(__name__)
 
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://'+os.getenv("MYSQL_USERNAME")+ ':' + os.getenv("MYSQL_PASSWORD") + '@localhost/homey_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://'+os.getenv("MYSQL_USERNAME")+ ':' + os.getenv("MYSQL_PASSWORD") + '@localhost/homey_db'
 # 
-config_type = os.getenv('CONFIG_TYPE', default='config.DevelopmentConfig')
-app.config.from_object(config_type)
+# config_type = os.getenv('CONFIG_TYPE', default='config.DevelopmentConfig')
+# app.config.from_object(config_type)
 
 
 db = SQLAlchemy(app)
@@ -60,7 +60,11 @@ def createUser():
     new_row = User(id=uniqueId, name=data['name'], email=data['email'], password=data['password'])
     db.session.add(new_row)
     db.session.commit()
-    result_json = json.dumps(f'User {uniqueId} Created')
+    # result_json = json.dumps(f'User {uniqueId} Created')
+    user = User.query.filter_by(id=uniqueId)
+    acc = user[0]
+    result_json = json.dumps(acc.as_dict())
+
     response = Response(result_json, content_type='application/json')
 
     return response
@@ -133,7 +137,7 @@ def updateUser(user_id):
         if user.first() is None:
             return "invalid user id, you shouldn't be here"
         else:
-            return Response(json.dumps("Account successfully updated!"), content_type='application/json')
+            return Response(json.dumps(acc.as_dict()), content_type='application/json')
     else: 
         return Response(json.dumps("update failed"), content_type='application/json')
     
@@ -152,7 +156,10 @@ def createProperty():
     db.session.add(new_row)
     db.session.commit()
 
-    return Response(json.dumps("Property created!"), content_type='application/json')
+    property = db.session.query(Property).filter_by(id = data['id'])
+    prop = property[0]
+
+    return Response(json.dumps(prop.as_dict()), content_type='application/json')
 
 @app.route("/getProperty", methods=["GET"])
 def getProperty():
@@ -202,7 +209,7 @@ def updateProperty(prop_id):
         if property.first() is None:
             return Response(json.dumps(f"Property with property_id {prop_id} does not exist"), content_type='application/json')
         else:
-            return Response(json.dumps("Property successfully updated"), content_type='application/json')
+            return Response(json.dumps(prop.as_dict()), content_type='application/json')
     else: 
         return Response(json.dumps("Update Failed"), content_type='application/json')
 
@@ -212,7 +219,7 @@ def updateProperty(prop_id):
 #this requires user to be logged in!
 @app.route("/createUSP/<user_id>", methods=["POST"])
 def createUserSavedProperty(user_id):
-    # data = json.loads({"userID" : "1","propertyId" : "1", "property": {"id": "12", "clusterId": "1", "type": "rent"}})
+    # data = json.loads({"userID" : "1","propertyId" : "1", "property": {"id": "1", "clusterId": "1", "type": "rent"}})
     data = request.get_json()
     user = db.session.query(User).filter_by(id = user_id)
     user = user[0]
@@ -224,7 +231,8 @@ def createUserSavedProperty(user_id):
     user.propertySaved = pickle.dumps(propSaved)
     db.session.add(new_row)
     db.session.commit()
-    return Response(json.dumps("usp created"), content_type='application/json')
+
+    return Response(json.dumps(propSaved), content_type='application/json')
 
 # depracated, use view user method to get propertySaved
 # @app.route("/viewUSP/<user_id>", methods=["GET"])
@@ -261,7 +269,7 @@ def deleteUSP(user_id,prop_id):
             db.session.delete(usp)
             db.session.commit()
 
-            return Response(json.dumps("USP has been deleted"), content_type='application/json')
+            return Response(json.dumps(propSaved), content_type='application/json')
         
     else: 
         return Response(json.dumps("method not allowed"), content_type='application/json')
