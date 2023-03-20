@@ -80,7 +80,7 @@ def getUser():
             user = db.session.query(User).filter_by(id = user_id)
         elif email is not None:
             user = db.session.query(User).filter_by(email = email)
-            
+
         if user.first() is None:
             result_json = json.dumps(f"Account with userID {user_id} does not exist")
             response = Response(result_json, content_type='application/json')
@@ -223,22 +223,28 @@ def updateProperty(prop_id):
 ## CRUD FOR USP
 
 #this requires user to be logged in!
-@app.route("/createUSP/<user_id>", methods=["POST"])
-def createUserSavedProperty(user_id):
+@app.route("/createUSP", methods=["POST"])
+def createUserSavedProperty():
     # data = json.loads({"userID" : "1","propertyId" : "1", "property": {"id": "1", "clusterId": "1", "type": "rent"}})
     data = request.get_json()
-    user = db.session.query(User).filter_by(id = user_id)
-    user = user[0]
-    # print(user)
-    pickledProperty = pickle.dumps(data["property"])
-    new_row = UserSavedProperty(userID=data["userID"], propertyId=data["propertyId"], property=pickledProperty)
-    propSaved = pickle.loads(user.propertySaved)
-    propSaved.append(new_row.as_dict()['property'])
-    user.propertySaved = pickle.dumps(propSaved)
-    db.session.add(new_row)
-    db.session.commit()
+    if 'userID' in data:
 
-    return Response(json.dumps(propSaved), content_type='application/json')
+        user = db.session.query(User).filter_by(id = data['userID']).first()
+
+        if user is None:
+            return Response(json.dumps("User not found"), content_type='application/json')
+        else:
+            pickledProperty = pickle.dumps(data["property"])
+            new_row = UserSavedProperty(userID=data["userID"], propertyId=data["propertyId"], property=pickledProperty)
+            propSaved = pickle.loads(user.propertySaved)
+            propSaved.append(new_row.as_dict()['property'])
+            user.propertySaved = pickle.dumps(propSaved)
+            db.session.add(new_row)
+            db.session.commit()
+
+        return Response(json.dumps(propSaved), content_type='application/json')
+    else:
+        return Response(json.dumps('No userID provided in POST req'), content_type='application/json')
 
 # depracated, use view user method to get propertySaved
 # @app.route("/viewUSP/<user_id>", methods=["GET"])
