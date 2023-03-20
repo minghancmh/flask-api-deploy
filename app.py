@@ -73,8 +73,14 @@ def createUser():
 def getUser():
     args = request.args
     user_id = args.get('id')
+    email = args.get('email')
+
     if request.method == 'GET':
-        user = db.session.query(User).filter_by(id = user_id)
+        if user_id is not None:
+            user = db.session.query(User).filter_by(id = user_id)
+        elif email is not None:
+            user = db.session.query(User).filter_by(email = email)
+            
         if user.first() is None:
             result_json = json.dumps(f"Account with userID {user_id} does not exist")
             response = Response(result_json, content_type='application/json')
