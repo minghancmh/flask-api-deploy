@@ -19,10 +19,10 @@ load_dotenv() #load environment variables
 app = Flask(__name__)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://'+os.getenv("MYSQL_USERNAME")+ ':' + os.getenv("MYSQL_PASSWORD") + '@localhost/homey_db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://'+os.getenv("MYSQL_USERNAME")+ ':' + os.getenv("MYSQL_PASSWORD") + '@localhost/homey_db'
 # 
-# config_type = os.getenv('CONFIG_TYPE', default='config.DevelopmentConfig')
-# app.config.from_object(config_type)
+config_type = os.getenv('CONFIG_TYPE', default='config.DevelopmentConfig')
+app.config.from_object(config_type)
 
 
 db = SQLAlchemy(app)
@@ -67,7 +67,7 @@ def createUser():
 
     response = Response(result_json, content_type='application/json')
 
-    return response
+    return response, 200 
 
 @app.route("/getUser", methods=["GET"])
 def getUser():
@@ -84,7 +84,7 @@ def getUser():
         if user.first() is None:
             result_json = json.dumps(f"Account with userID {user_id} does not exist")
             response = Response(result_json, content_type='application/json')
-            return response
+            return response, 404
 
         
         else:
@@ -92,7 +92,7 @@ def getUser():
             accout = acc.as_dict()
             result = json.dumps(accout)
             response = Response(result, content_type='application/json')
-            return response
+            return response, 200
 
 
 
@@ -105,7 +105,7 @@ def deleteUser(user_id):
         if user is None:
             result_json = json.dumps(f"Account with userID {user_id} does not exist")
             response = Response(result_json, content_type='application/json')
-            return response
+            return response, 404
 
         
         else:
@@ -114,11 +114,11 @@ def deleteUser(user_id):
 
             result_json = json.dumps(f"Account with userID {user_id} has been deleted")
             response = Response(result_json, content_type='application/json')
-            return response
+            return response, 200
 
         
     else: 
-        return Response(json.dumps("method not allowed"), content_type='application/json')
+        return Response(json.dumps("method not allowed"), content_type='application/json'), 405
 
     
 @app.route("/updateUser/<user_id>", methods=["PATCH"])
@@ -141,11 +141,11 @@ def updateUser(user_id):
         db.session.commit()
 
         if user.first() is None:
-            return "invalid user id, you shouldn't be here"
+            return Response(json.dumps("User does not exist"), content_type='application/json'), 404
         else:
-            return Response(json.dumps(acc.as_dict()), content_type='application/json')
+            return Response(json.dumps(acc.as_dict()), content_type='application/json'), 200
     else: 
-        return Response(json.dumps("update failed"), content_type='application/json')
+        return Response(json.dumps("Method not allowed"), content_type='application/json'), 405
     
 
 ## CRUD FOR PROPERTY
@@ -165,7 +165,7 @@ def createProperty():
     property = db.session.query(Property).filter_by(id = data['id'])
     prop = property[0]
 
-    return Response(json.dumps(prop.as_dict()), content_type='application/json')
+    return Response(json.dumps(prop.as_dict()), content_type='application/json'), 200
 
 @app.route("/getProperty", methods=["GET"])
 def getProperty():
@@ -175,30 +175,30 @@ def getProperty():
         property = db.session.query(Property).filter_by(id = prop_id)
 
         if property.first() is None:
-            return Response(json.dumps(f"Property with PropID {prop_id} does not exist"), content_type='application/json')
+            return Response(json.dumps(f"Property with PropID {prop_id} does not exist"), content_type='application/json'), 404
         
         else:
 
             prop = property[0]
             propout = prop.as_dict()
 
-            return Response(json.dumps(propout), content_type='application/json')
+            return Response(json.dumps(propout), content_type='application/json'), 200
 
-@app.route("/deleteProperty/<int:prop_id>", methods=["DELETE"])
+@app.route("/deleteProperty/<prop_id>", methods=["DELETE"])
 def deleteProperty(prop_id):
     if request.method == 'DELETE':
-        property = Property.query.filter_by(id=str(prop_id)).first()
+        property = Property.query.filter_by(id=prop_id).first()
         if property is None:
-            return Response(json.dumps(f"Property with Property_ID {prop_id} does not exist"), content_type='application/json')
+            return Response(json.dumps(f"Property with Property_ID {prop_id} does not exist"), content_type='application/json'), 404
         
         else:
             db.session.delete(property)
             db.session.commit()
 
-            return Response(json.dumps(f"Property with id {prop_id} has been deleted"), content_type='application/json')
+            return Response(json.dumps(f"Property with id {prop_id} has been deleted"), content_type='application/json'), 200 
         
     else: 
-        return Response(json.dumps("method not allowed"), content_type='application/json')
+        return Response(json.dumps("method not allowed"), content_type='application/json'), 405
 
 @app.route("/updateProperty/<prop_id>", methods=["PATCH"])
 def updateProperty(prop_id): 
@@ -213,11 +213,11 @@ def updateProperty(prop_id):
         db.session.commit()
 
         if property.first() is None:
-            return Response(json.dumps(f"Property with property_id {prop_id} does not exist"), content_type='application/json')
+            return Response(json.dumps(f"Property with property_id {prop_id} does not exist"), content_type='application/json'), 404
         else:
-            return Response(json.dumps(prop.as_dict()), content_type='application/json')
+            return Response(json.dumps(prop.as_dict()), content_type='application/json'), 200
     else: 
-        return Response(json.dumps("Update Failed"), content_type='application/json')
+        return Response(json.dumps("Method not allowed"), content_type='application/json'), 405
 
 
 ## CRUD FOR USP
@@ -232,7 +232,7 @@ def createUserSavedProperty():
         user = db.session.query(User).filter_by(id = data['userID']).first()
 
         if user is None:
-            return Response(json.dumps("User not found"), content_type='application/json')
+            return Response(json.dumps("User not found"), content_type='application/json'), 404
         else:
             pickledProperty = pickle.dumps(data["property"])
             new_row = UserSavedProperty(userID=data["userID"], propertyId=data["propertyId"], property=pickledProperty)
@@ -242,9 +242,9 @@ def createUserSavedProperty():
             db.session.add(new_row)
             db.session.commit()
 
-        return Response(json.dumps(propSaved), content_type='application/json')
+        return Response(json.dumps(propSaved), content_type='application/json'), 200
     else:
-        return Response(json.dumps('No userID provided in POST req'), content_type='application/json')
+        return Response(json.dumps('No userID provided in POST req'), content_type='application/json'), 400
 
 # depracated, use view user method to get propertySaved
 # @app.route("/viewUSP/<user_id>", methods=["GET"])
@@ -267,7 +267,7 @@ def deleteUSP(user_id,prop_id):
         usp = UserSavedProperty.query.filter_by(userID = user_id, propertyId=prop_id).first()
         user = User.query.filter_by(id=user_id).first()
         if usp is None:
-            return Response(json.dumps("USP does not exist"), content_type='application/json')
+            return Response(json.dumps("USP does not exist"), content_type='application/json'), 404
         
         else:
             propSaved = pickle.loads(user.propertySaved)
@@ -281,10 +281,10 @@ def deleteUSP(user_id,prop_id):
             db.session.delete(usp)
             db.session.commit()
 
-            return Response(json.dumps(propSaved), content_type='application/json')
+            return Response(json.dumps(propSaved), content_type='application/json'), 200
         
     else: 
-        return Response(json.dumps("method not allowed"), content_type='application/json')
+        return Response(json.dumps("method not allowed"), content_type='application/json'), 405 
     
 
 # if __name__ == "__main__":
