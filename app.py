@@ -56,6 +56,10 @@ session = Session()
 def createUser():
     # data = json.loads('{"name": "hello", "email": "hello@gmail.com", "password": "1234"}')
     data = request.get_json() #get json payload from the post req
+    userEmail = db.session.query(User).filter_by(email = data['email'])
+    if userEmail.first() is not None:
+        response  = Response("Email already exists", content_type='application/json')
+        return response, 404
     uniqueId = generator()
     new_row = User(id=uniqueId, name=data['name'], email=data['email'], password=data['password'])
     db.session.add(new_row)
