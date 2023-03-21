@@ -128,24 +128,21 @@ def updateUser(user_id):
         user = db.session.query(User).filter_by(id = user_id)
         acc = user[0]
 
-        for key,value in request_params.items():
-            if key=='email':
-                continue
-            setattr(acc, key, value)
+        if user.first() is None:
+            return Response(json.dumps("User does not exist"), content_type='application/json'), 404
+        else:
+            for key,value in request_params.items():
+                if key=='email':
+                    continue
+                setattr(acc, key, value)
+            db.session.commit()
+            return Response(json.dumps(acc.as_dict()), content_type='application/json'), 200
+
 
 
         # acc.name = data['name']
         # acc.email = data['email']
         # acc.password = data['password']
-
-
-
-        db.session.commit()
-
-        if user.first() is None:
-            return Response(json.dumps("User does not exist"), content_type='application/json'), 404
-        else:
-            return Response(json.dumps(acc.as_dict()), content_type='application/json'), 200
     else: 
         return Response(json.dumps("Method not allowed"), content_type='application/json'), 405
     
@@ -237,11 +234,20 @@ def createUserSavedProperty():
             return Response(json.dumps("User not found"), content_type='application/json'), 404
         else:
             pickledProperty = pickle.dumps(data["property"])
-            new_row = UserSavedProperty(userID=data["userID"], propertyId=data["propertyId"], property=pickledProperty)
+            new_USP = UserSavedProperty(userID=data["userID"], propertyId=data["propertyId"], property=pickledProperty)
+            
+            propJSON = data['property']
+            prop = db.session.query(Property).filter_by(id=propJSON['id'])
+            if prop.first() is None:
+                new_prop = Property(id=propJSON['id'], clusterId=propJSON['clusterId'], type=propJSON['type'])
+
+
             propSaved = pickle.loads(user.propertySaved)
-            propSaved.append(new_row.as_dict()['property'])
+            propSaved.append(new_USP.as_dict()['property'])
             user.propertySaved = pickle.dumps(propSaved)
-            db.session.add(new_row)
+
+            db.session.add(new_USP)
+            db.session.add(new_prop)
             db.session.commit()
 
         return Response(json.dumps(propSaved), content_type='application/json'), 200

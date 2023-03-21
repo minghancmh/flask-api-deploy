@@ -20,6 +20,7 @@ class User(db.Model):
     email = Column('email', String(100), unique=True)
     password = Column('password', String(100))
     propertySaved = Column('propertySaved', PickleType)
+    image = Column('image', String(256))
 
 
     def __init__ (self, id, name, email,password):
@@ -28,6 +29,7 @@ class User(db.Model):
         self.email = email
         self.password = password
         self.propertySaved = pickle.dumps([])
+        self.image = ""
 
 
     def as_dict(self):
@@ -43,6 +45,8 @@ class User(db.Model):
                 dicout["password"] = getattr(self,col.name)
             if col.name=="propertySaved":
                 dicout["propertySaved"] = pickle.loads(getattr(self,col.name))
+            if col.name=="image":
+                dicout["image"] = getattr(self, col.name)
         return dicout
 
 class Property(db.Model):
