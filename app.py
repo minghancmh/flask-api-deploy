@@ -129,6 +129,8 @@ def updateUser(user_id):
         acc = user[0]
 
         for key,value in request_params.items():
+            if key=='email':
+                continue
             setattr(acc, key, value)
 
 
