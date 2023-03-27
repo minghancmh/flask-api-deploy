@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, Boolean
 from app import db
 from sqlalchemy.types import PickleType, Enum
 from sqlalchemy.schema import PrimaryKeyConstraint
@@ -54,12 +54,16 @@ class Property(db.Model):
     id = Column('id', String(100), primary_key=True)
     clusterId = Column('clusterId', String(100))
     type = Column('type', Enum(PropertyType))
+    stringifiedListing = Column('stringifiedListing', String(512))
+    isAvailable = Column('isAvailable', Boolean)
     # UserSaved = Column('UserSaved', )
 
-    def __init__(self, id, clusterId, type):
+    def __init__(self, id, clusterId, type, stringifiedListing, isAvailable):
         self.id = id
         self.clusterId = clusterId
         self.type = type
+        self.stringifiedListing = stringifiedListing
+        self.isAvailable = isAvailable
     
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

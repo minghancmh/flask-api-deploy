@@ -159,9 +159,17 @@ def createProperty():
     data = request.get_json() #get json payload from the post req
     print(data)
     if "type" not in data:
-        new_row = Property(id=data['id'], clusterId=data['clusterId'], type=PropertyType.RENT)
+        if "isAvailable" not in data:
+            new_row = Property(id=data['id'], clusterId=data['clusterId'], type=PropertyType.RENT, stringifiedListing=data['stringifiedListing'], isAvailable = True)
+        else:
+            new_row = Property(id=data['id'], clusterId=data['clusterId'], type=PropertyType.RENT, stringifiedListing=data['stringifiedListing'], isAvailable = data['isAvailable'])
+
     else:
-        new_row = Property(id=data['id'], clusterId=data['clusterId'], type=data["type"])
+        if "isAvailable" not in data:
+            new_row = Property(id=data['id'], clusterId=data['clusterId'], type=data["type"], stringifiedListing=data['stringifiedListing'], isAvailable=True)
+        else:
+            new_row = Property(id=data['id'], clusterId=data['clusterId'], type=data["type"], stringifiedListing=data['stringifiedListing'], isAvailable=data['isAvailable'])
+
     db.session.add(new_row)
     db.session.commit()
 
@@ -243,7 +251,7 @@ def createUserSavedProperty():
             propJSON = data['property']
             prop = db.session.query(Property).filter_by(id=propJSON['id'])
             if prop.first() is None:
-                new_prop = Property(id=propJSON['id'], clusterId=propJSON['clusterId'], type=propJSON['type'])
+                new_prop = Property(id=propJSON['id'], clusterId=propJSON['clusterId'], type=propJSON['type'], stringifiedListing=propJSON['stringifiedListing'], isAvailable=propJSON['isAvailable'])
 
 
             propSaved = pickle.loads(user.propertySaved)
