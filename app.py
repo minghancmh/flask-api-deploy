@@ -251,7 +251,12 @@ def createUserSavedProperty():
             propJSON = data['property']
             prop = db.session.query(Property).filter_by(id=propJSON['id'])
             if prop.first() is None:
-                new_prop = Property(id=propJSON['id'], clusterId=propJSON['clusterId'], type=propJSON['type'], stringifiedListing=propJSON['stringifiedListing'], isAvailable=propJSON['isAvailable'])
+                if 'isAvailable' in propJSON:
+                    new_prop = Property(id=propJSON['id'], clusterId=propJSON['clusterId'], type=propJSON['type'], stringifiedListing=propJSON['stringifiedListing'], isAvailable=propJSON['isAvailable'])
+
+
+                else:
+                    new_prop = Property(id=propJSON['id'], clusterId=propJSON['clusterId'], type=propJSON['type'], stringifiedListing=propJSON['stringifiedListing'], isAvailable=True)
 
 
             propSaved = pickle.loads(user.propertySaved)
